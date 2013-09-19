@@ -1,9 +1,25 @@
-local luaqub = {}
+local luaqub, Compile = {}, {}
+
+function Compile.SELECT( Object )
+	local sReturn, colNames, tbls = "SELECT ", table.concat( Object._select, ",\n\t" ), table.concat( Object._from, ",\n\t" )
+	sReturn = sReturn..colNames.."\nFROM "..tbls
+	if #(Object._where) > 0 then
+		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
+	end
+	if Object._limit > 0 then
+		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
+	end
+	if Object._offset > 0 then
+		sReturn = sReturn.."\nOFFSET "..tostring( Object._offset )
+	end
+	return sReturn
+end
 
 luaqub.__index = luaqub
 
 local function Trim( sInput )
-	return sInput:gsub( "^[%s]*(.-)[%s]*$", "%1" )
+	local x = sInput:gsub( "^[%s]*(.-)[%s]*$", "%1" )
+	return x
 end
 
 local function ParseString( sInput )
@@ -26,13 +42,17 @@ local function ParseTable( tInput )
 	return tReturn
 end
 
+function luaqub:__tostring()
+	return Compile[self._flag:upper()]( self )
+end
+
 function luaqub:select( cols )
 	if not cols then
 		error( "Argument to select function expected" )
 		return false
 	end
 	if type( cols ) == "string" then
-		if Trim( cols ) = "*" then
+		if Trim( cols ) == "*" then
 			self._select = { '*' }
 		else
 			self._select, cols = ParseString( cols ), nil
@@ -62,9 +82,10 @@ function luaqub:where( clauses )
 		error( "Matching clauses to where function expected" )
 		return false
 	end
-	if type( tbls ) == "string" then
-		self._where, clauses = { clauses }, nil
-	elseif type( tbls ) == "table" then
+	if type( clauses ) == "string" then
+		table.insert( self._where, clauses )
+		clauses = nil
+	elseif type( clauses ) == "table" then
 		self._where, clauses = clauses, nil
 	end
 	return self
