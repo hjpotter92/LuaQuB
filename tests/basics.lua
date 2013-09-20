@@ -12,8 +12,9 @@ print( tostring(y) )
 --! ------
 --!
 --! SELECT id,
---! 	 nick
+--! 	nick
 --! FROM scores
---! WHERE nick LIKE 'hjp%'
+--! WHERE nick <> 'hjpotter92'
+--! 	AND date = CURDATE()
 --! LIMIT 20
 --

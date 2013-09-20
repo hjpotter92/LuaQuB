@@ -18,7 +18,7 @@ end
 luaqub.__index = luaqub
 
 local function Trim( sInput )
-	local x = sInput:gsub( "^[%s]*(.-)[%s]*$", "%1" )
+	local x = sInput:match( "^[%s]*(.-)[%s]*$" )
 	return x
 end
 
@@ -36,7 +36,7 @@ local function ParseTable( tInput )
 		if tonumber( Key ) then
 			table.insert( tReturn, Trim(Value) )
 		else
-			table.insert( tReturn, ("%s AS %s"):format(Trim(Key), Trim(Value)) )
+			table.insert( tReturn, ("%s %s"):format(Trim(Key), Trim(Value)) )
 		end
 	end
 	return tReturn
@@ -86,7 +86,14 @@ function luaqub:where( clauses )
 		table.insert( self._where, clauses )
 		clauses = nil
 	elseif type( clauses ) == "table" then
-		self._where, clauses = clauses, nil
+		for Key, Value in pairs( clauses ) do
+			if tonumber( Key ) then
+				table.insert( self._where, Value )
+			else
+				table.insert( self._where, ("%s = %s"):format(Trim(Key), Trim(Value)) )
+			end
+		end
+		clauses = nil
 	end
 	return self
 end
