@@ -1,22 +1,5 @@
 local luaqub, Compile = {}, {}
 
-function Compile.SELECT( Object )
-	local sReturn, colNames, tbls = "SELECT ", table.concat( Object._select, ",\n\t" ), table.concat( Object._from, ",\n\t" )
-	sReturn = sReturn..colNames.."\nFROM "..tbls
-	if #(Object._where) > 0 then
-		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
-	end
-	if Object._limit > 0 then
-		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
-	end
-	if Object._offset > 0 then
-		sReturn = sReturn.."\nOFFSET "..tostring( Object._offset )
-	end
-	return sReturn
-end
-
-luaqub.__index = luaqub
-
 local function Trim( sInput )
 	local x = sInput:match( "^[%s]*(.-)[%s]*$" )
 	return x
@@ -36,11 +19,42 @@ local function ParseTable( tInput )
 		if tonumber( Key ) then
 			table.insert( tReturn, Trim(Value) )
 		else
-			table.insert( tReturn, ("%s %s"):format(Trim(Key), Trim(Value)) )
+			table.insert( tReturn, ("%s `%s`"):format(Trim(Key), Trim(Value)) )
 		end
 	end
 	return tReturn
 end
+
+local function ParseJoins( sInput, Object )
+	if #(Object._join) <= 0 then
+		return sInput
+	end
+	for Key, tValue in pairs( Object._join ) do
+		sInput = sInput.."\n"..tValue.condition.." "..tValue.tbl.."\n\tON "..tValue.on
+	end
+	return sInput
+end
+
+function Compile.SELECT( Object )
+	local sReturn, colNames, tbls = "SELECT ", table.concat( Object._select, ",\n\t" ), table.concat( Object._from, ",\n\t" )
+	sReturn = sReturn..colNames
+	if #(Object._from) > 0 then
+		sReturn = sReturn.."\nFROM "..tbls
+	end
+	if #(Object._where) > 0 then
+		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
+	end
+	sReturn = ParseJoins( sReturn, Object )
+	if Object._limit > 0 then
+		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
+	end
+	if Object._offset > 0 then
+		sReturn = sReturn.."\nOFFSET "..tostring( Object._offset )
+	end
+	return sReturn
+end
+
+luaqub.__index = luaqub
 
 function luaqub:__tostring()
 	return Compile[self._flag:upper()]( self )
@@ -98,6 +112,19 @@ function luaqub:where( clauses )
 	return self
 end
 
+function luaqub:join( tbl, clause, cond )
+	if not cond then
+		cond = "JOIN"
+	else
+		cond = Trim( cond:upper() ).." JOIN"
+	end
+	if type( clause ) == "string" then
+		clause = Trim( clause )
+	end
+	table.insert( self._join, { condition = cond, tbl = tbl, on = clause } )
+	return self
+end
+
 function luaqub:limit( lim, off )
 	if not tonumber( lim ) then
 		error( "Limit argument should be a number" )
@@ -119,6 +146,7 @@ function luaqub.new()
 		_select = {},
 		_from = {},
 		_where = {},
+		_join = {},
 		_limit = 0,
 		_offset = 0,
 		_flag = '',
