@@ -35,16 +35,27 @@ local function ParseJoins( sInput, Object )
 	return sInput
 end
 
+local function ParseOrder( sInput, Object )
+	if #(Object._order) <= 0 then
+		return sInput
+	end
+	for Key, tValue in pairs( Object._order ) do
+		sInput = sInput.."\nORDER BY "..tValue.col.." "..tValue.dir
+	end
+	return sInput
+end
+
 function Compile.SELECT( Object )
 	local sReturn, colNames, tbls = "SELECT ", table.concat( Object._select, ",\n\t" ), table.concat( Object._from, ",\n\t" )
 	sReturn = sReturn..colNames
 	if #(Object._from) > 0 then
 		sReturn = sReturn.."\nFROM "..tbls
 	end
+	sReturn = ParseJoins( sReturn, Object )
 	if #(Object._where) > 0 then
 		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
 	end
-	sReturn = ParseJoins( sReturn, Object )
+	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
 		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
 	end
@@ -141,12 +152,33 @@ function luaqub:limit( lim, off )
 	return self
 end
 
+function luaqub:order( col, dir )
+	if not col then
+		error( "Blank call of order function is not allowed" )
+		return false
+	end
+	if type( col ) == "string" then
+		dir = ( dir and dir:upper() ) or "ASC"
+		table.insert( self._order, { col = col, dir = dir } )
+	elseif type( col ) == "table" then
+		for Key, Value in pairs( col ) do
+			if tonumber( Key ) then
+				table.insert( self._order, { col = Value, dir = "ASC" } )
+			else
+				table.insert( self._order, { col = Key, dir = Value:upper() } )
+			end
+		end
+	end
+	return self
+end
+
 function luaqub.new()
 	local tNew = {
 		_select = {},
 		_from = {},
 		_where = {},
 		_join = {},
+		_order = {},
 		_limit = 0,
 		_offset = 0,
 		_flag = '',
