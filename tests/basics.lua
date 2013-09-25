@@ -1,12 +1,12 @@
 package.path = [[..\src\?.lua]]
-local x = require "qublua"
-local y = x.new()
+local LuaQuB = require "qublua"
+local Object = LuaQuB.new()
 
-y:select( "id, nick" ):from( "scores" ):where( "nick <> 'hjpotter92'" ):limit( 20 )
+Object:select( "id, nick" ):from( "scores" ):where( "nick <> 'hjpotter92'" ):limit( 20 )
 
-y:where( "date = CURDATE()" )
+Object:where( "date = CURDATE()" )
 
-print( tostring(y) )
+print( tostring(Object) )
 
 --- Output
 --! ------

@@ -1,19 +1,18 @@
 package.path = [[..\src\?.lua]]
-local x = require "qublua"
+local LuaQuB = require "qublua"
+local Object = LuaQuB.new()
 
-local myQubObj = x.new()
-
-myQubObj:select( {
+Object:select( {
 	col1 = "ID",
 	col2 = "Name",
 	col3 = "Date",
 	"col4"
 } )
-myQubObj:from( 'tblName' )
-myQubObj:limit( 15, 200 )
-myQubObj:where( { "col1 <> 1", col2 = "'hi'" } )
+Object:from( 'tblName' )
+Object:limit( 15, 200 )
+Object:where( { "col1 <> 1", col2 = "'hi'" } )
 
-print( tostring(myQubObj) )
+print( tostring(Object) )
 
 --- Output
 --! ------
