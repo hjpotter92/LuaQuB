@@ -35,14 +35,23 @@ local function ParseJoins( sInput, Object )
 	return sInput
 end
 
+local function ParseGroup( sInput, Object )
+	if #(Object._group) <= 0 then
+		return sInput
+	end
+	sInput = sInput.."\nGROUP BY "..table.concat( Object._group, ",\n\t" )
+	return sInput
+end
+
 local function ParseOrder( sInput, Object )
 	if #(Object._order) <= 0 then
 		return sInput
 	end
+	sInput, tOrder = sInput.."\nORDER BY ", {}
 	for Key, tValue in pairs( Object._order ) do
-		sInput = sInput.."\nORDER BY "..tValue.col.." "..tValue.dir
+		tOrder[#tOrder + 1] = tValue.col.." "..tValue.dir
 	end
-	return sInput
+	return sInput..table.concat( tOrder, ",\n\t" )
 end
 
 function Compile.SELECT( Object )
@@ -55,6 +64,7 @@ function Compile.SELECT( Object )
 	if #(Object._where) > 0 then
 		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
 	end
+	sReturn = ParseGroup( sReturn, Object )
 	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
 		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
@@ -172,6 +182,21 @@ function luaqub:order( col, dir )
 	return self
 end
 
+function luaqub:group( col )
+	if not col then
+		error( "Blank call of group function is not allowed" )
+		return false
+	end
+	if type( col ) == "string" then
+		table.insert( self._group, col )
+	elseif type( col ) == "table" then
+		for Key, Value in pairs( col ) do
+			table.insert( self._group, Value )
+		end
+	end
+	return self
+end
+
 function luaqub.new()
 	local tNew = {
 		_select = {},
@@ -179,6 +204,7 @@ function luaqub.new()
 		_where = {},
 		_join = {},
 		_order = {},
+		_group = {},
 		_limit = 0,
 		_offset = 0,
 		_flag = '',
