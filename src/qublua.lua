@@ -75,6 +75,26 @@ function Compile.SELECT( Object )
 	return sReturn
 end
 
+function Compile.UPDATE( Object )
+	if type( Object._from ) ~= "string" then
+		error( "Update can be performed on a single table." )
+		return false
+	end
+	local sReturn, tSet = "UPDATE "..Object._from.."\nSET ", {}
+	for Key, Value in pairs( Object._update ) do
+		tSet[#tSet + 1] = Key.." = "..Value
+	end
+	sReturn = sReturn..table.concat( tSet, ",\n\t" )
+	if #(Object._where) > 0 then
+		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
+	end
+	sReturn = ParseOrder( sReturn, Object )
+	if Object._limit > 0 then
+		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
+	end
+	return sReturn
+end
+
 luaqub.__index = luaqub
 
 function luaqub:__tostring()
@@ -197,9 +217,23 @@ function luaqub:group( col )
 	return self
 end
 
+function luaqub:update( tbl, datas )
+	if type( tbl ) ~= 'string' then
+		error( "Update can be performed on a single table." )
+		return false
+	end
+	if type( datas ) ~= 'table' then
+		error( "Unexpected argument #2 to update. Table expected, got "..type(datas) )
+		return false
+	end
+	self._from, self._flag, self._update = tbl, 'update', datas
+	return self
+end
+
 function luaqub.new()
 	local tNew = {
 		_select = {},
+		_update = {},
 		_from = {},
 		_where = {},
 		_join = {},
