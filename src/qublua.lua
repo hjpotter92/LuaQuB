@@ -95,6 +95,24 @@ function Compile.UPDATE( Object )
 	return sReturn
 end
 
+function Compile.DELETE( Object )
+	if #(Object._from) == 0 then
+		error( "No table has been specified for DELETE call." )
+		return false
+	end
+	local sReturn = "DELETE FROM "..table.concat( Object._from, ",\n\t" )
+	if #(Object._where) > 0 then
+		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
+	end
+	if #(Object._from) == 1 then
+		sReturn = ParseOrder( sReturn, Object )
+		if Object._limit > 0 then
+			sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
+		end
+	end
+	return sReturn
+end
+
 luaqub.__index = luaqub
 
 function luaqub:__tostring()
@@ -227,6 +245,11 @@ function luaqub:update( tbl, datas )
 		return false
 	end
 	self._from, self._flag, self._update = tbl, 'update', datas
+	return self
+end
+
+function luaqub:delete()
+	self._flag = 'delete'
 	return self
 end
 
