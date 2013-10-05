@@ -1,5 +1,5 @@
 package.path = [[..\src\?.lua]]
-local LuaQuB = require "qublua"
+local LuaQuB = require "LuaQuB"
 local Object = LuaQuB.new()
 
 Object:select{ ["COUNT(1)"] = "count", ["DATE(dated)"] = "date" }

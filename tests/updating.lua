@@ -1,5 +1,5 @@
 package.path = [[..\src\?.lua]]
-local LuaQuB = require "qublua"
+local LuaQuB = require "LuaQuB"
 local Object = LuaQuB.new()
 
 local tUpdating = {

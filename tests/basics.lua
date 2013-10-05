@@ -1,5 +1,5 @@
 package.path = [[..\src\?.lua]]
-local LuaQuB = require "qublua"
+local LuaQuB = require "LuaQuB"
 local Object = LuaQuB.new()
 
 Object:select( "id, nick" ):from( "scores" ):where( "nick <> 'hjpotter92'" ):limit( 20 )
