@@ -3,11 +3,15 @@ Lua Query Builder
 
 LuaQuB is a small query builder module for Lua. I am building this because I'm tired of typing similar queries over and over as strings.
 
+## Requirements
+
+The module will work perfectly with Lua v5.x
+
 ## Usage
 
-Save the `qublua.lua` file (in `src` directory) to a folder listed under Lua's `package.path` or `package.cpath` variable. Call the module in your program by using `require` as follows:
+Save the `LuaQuB.lua` file (in root directory) to a folder listed under Lua's `package.path` or `package.cpath` variable. Call the module in your program by using `require` as follows:
 
-    local Builder = require "qublua"
+    local Builder = require "LuaQuB"
 Create an object by using `.new()` method of Builder module. This object will be used for bulding the query.
 
     local object = Builder.new()
@@ -33,6 +37,10 @@ which will give you the following output
     	AND LENGTH(message) < 255
     LIMIT 30
     OFFSET 10
+
+## Building
+
+LuaQuB can build queries for `SELECT`, `UPDATE` and `DELETE` commands. The output is for MySQL. There is no plan on increasing support for other database engines. Additionally, the module only produces `AND` concatenated `WHERE` clauses.
 
 ## Examples
 
