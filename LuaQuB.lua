@@ -1,8 +1,17 @@
 local luaqub, Compile = {}, {}
 
 local function Trim( sInput )
+	if type( sInput ) ~= 'string' then return tostring( sInput ) end
 	local x = sInput:match( "^[%s]*(.-)[%s]*$" )
 	return x
+end
+
+local function TableCopy( tInput )
+	local tReturn = {}
+	for k, v in pairs( tInput ) do
+		tReturn[k] = v
+	end
+	return tReturn
 end
 
 local function ParseString( sInput )
@@ -23,6 +32,18 @@ local function ParseTable( tInput )
 		end
 	end
 	return tReturn
+end
+
+local function ParseWhere( sQuery, tWhere )
+	local tInput = TableCopy( tWhere )
+	if #tInput == 0 then return sQuery end
+	sQuery = sQuery.."\nWHERE "..tInput[1].statement
+	table.remove( tInput, 1 )
+	if #tInput == 0 then return sQuery end
+	for _, tValue in ipairs( tInput ) do
+		sQuery = sQuery.."\n\t"..tValue.join.." "..tValue.statement
+	end
+	return sQuery
 end
 
 local function ParseJoins( sInput, Object )
@@ -61,9 +82,7 @@ function Compile.SELECT( Object )
 		sReturn = sReturn.."\nFROM "..tbls
 	end
 	sReturn = ParseJoins( sReturn, Object )
-	if #(Object._where) > 0 then
-		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
-	end
+	sReturn = ParseWhere( sReturn, Object._where )
 	sReturn = ParseGroup( sReturn, Object )
 	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
@@ -85,9 +104,7 @@ function Compile.UPDATE( Object )
 		tSet[#tSet + 1] = Key.." = "..Value
 	end
 	sReturn = sReturn..table.concat( tSet, ",\n\t" )
-	if #(Object._where) > 0 then
-		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
-	end
+	sReturn = ParseWhere( sReturn, Object._where )
 	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
 		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
@@ -101,9 +118,7 @@ function Compile.DELETE( Object )
 		return false
 	end
 	local sReturn = "DELETE FROM "..table.concat( Object._from, ",\n\t" )
-	if #(Object._where) > 0 then
-		sReturn = sReturn.."\nWHERE "..table.concat( Object._where, "\n\tAND " )
-	end
+	sReturn = ParseWhere( sReturn, Object._where )
 	if #(Object._from) == 1 then
 		sReturn = ParseOrder( sReturn, Object )
 		if Object._limit > 0 then
@@ -150,20 +165,23 @@ function luaqub:from( tbls )
 	return self
 end
 
-function luaqub:where( clauses )
+function luaqub:where( clauses, value, joiner )
 	if not clauses then
 		error( "Matching clauses to where function expected" )
 		return false
 	end
 	if type( clauses ) == "string" then
-		table.insert( self._where, clauses )
+		if not joiner then joiner = 'and' end
+		table.insert( self._where, { join = joiner:upper(), statement = Trim(clauses).." "..Trim(value) } )
 		clauses = nil
 	elseif type( clauses ) == "table" then
+		if not value then value = 'and' end
+		joiner = value:upper()
 		for Key, Value in pairs( clauses ) do
 			if tonumber( Key ) then
-				table.insert( self._where, Value )
+				table.insert( self._where, { join = joiner, statement = Value } )
 			else
-				table.insert( self._where, ("%s = %s"):format(Trim(Key), Trim(Value)) )
+				table.insert( self._where, { join = joiner, statement = ("%s = %s"):format(Trim(Key), Trim(Value)) } )
 			end
 		end
 		clauses = nil

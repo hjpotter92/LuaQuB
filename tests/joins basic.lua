@@ -8,7 +8,7 @@ Object:from( { nickstats = 'n' } )
 
 Object:join( 'nickstats_login', 'n.id = nickstats_login.nickstats_id', 'LEFT' ):limit( 15 )
 
-print( tostring(Object) )
+print( Object )
 
 --- Output
 --! ------

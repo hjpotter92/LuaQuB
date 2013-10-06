@@ -12,7 +12,7 @@ Object:from( 'tblName' )
 Object:limit( 15, 200 )
 Object:where( { "col1 <> 1", col2 = "'hi'" } )
 
-print( tostring(Object) )
+print( Object )
 
 --- Output
 --! ------
