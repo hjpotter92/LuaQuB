@@ -1,4 +1,4 @@
-package.path = [[..\src\?.lua]]
+package.path = [[../?.lua]]
 local LuaQuB = require "LuaQuB"
 local Object = LuaQuB.new()
 
