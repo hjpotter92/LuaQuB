@@ -40,8 +40,12 @@ which will give you the following output
 
 ## Building
 
-LuaQuB can build queries for `SELECT`, `UPDATE` and `DELETE` commands. The output is for MySQL. There is no plan on increasing support for other database engines. Additionally, the module only produces `AND` concatenated `WHERE` clauses.
+LuaQuB can build queries for `SELECT`, `UPDATE`, `INSERT` and `DELETE` commands. The output is for MySQL. There is no plan on increasing support for other database engines.
 
 ## Examples
 
-A few examples will be saved under the `tests` directory.
+Short examples for each of the four supported commands and their various variations have been added under the `tests/` directory.
+
+## Not supported
+
+The module does not check whether your input was properly escaped or not. It assumes that your input will be accordingly given.

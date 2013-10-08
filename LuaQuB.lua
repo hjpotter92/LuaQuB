@@ -128,6 +128,12 @@ function Compile.DELETE( Object )
 	return sReturn
 end
 
+function Compile.INSERT( Object )
+	local tInsert = Object._insert
+	local sReturn = ("INSERT INTO `%s` ( %s )\nVALUES\n(\n\t%s\n)"):format( tInsert.tbl, table.concat(tInsert.cols, ', '), table.concat(tInsert.val, ',\n\t') )
+	return sReturn
+end
+
 luaqub.__index = luaqub
 
 function luaqub:__tostring()
@@ -271,6 +277,28 @@ function luaqub:delete()
 	return self
 end
 
+function luaqub:insert( tbl, datas )
+	if not datas or type( datas ) ~= 'table' then
+		error( "Unexpected argument #2 passed to insert function." )
+		return false
+	end
+	if type( tbl ) ~= 'string' then
+		error( "String argument expected for insert function." )
+		return false
+	end
+	local tCols, tValue = {}, {}
+	for Key, Value in pairs( datas ) do
+		table.insert( tCols, ('`%s`'):format(Trim(Key)) )
+		if not tonumber(Value) then
+			table.insert( tValue, ("'%s'"):format(Trim(Value)) )
+		else
+			table.insert( tValue, Trim(Value) )
+		end
+	end
+	self._flag, self._insert.cols, self._insert.val, self._insert.tbl = 'insert', tCols, tValue, tbl
+	return self
+end
+
 function luaqub.new()
 	local tNew = {
 		_select = {},
@@ -280,6 +308,7 @@ function luaqub.new()
 		_join = {},
 		_order = {},
 		_group = {},
+		_insert = {},
 		_limit = 0,
 		_offset = 0,
 		_flag = '',
