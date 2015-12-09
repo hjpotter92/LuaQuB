@@ -1,8 +1,8 @@
 local luaqub, Compile = {}, {}
 
 local function Trim( sInput )
-	if type( sInput ) ~= 'string' then return tostring( sInput ) end
-	local x = sInput:match( "^[%s]*(.-)[%s]*$" )
+	if type( sInput ) ~= 'string' then return end
+	local x = sInput:match "^%s*(.-)%s*$"
 	return x
 end
 
