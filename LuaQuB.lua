@@ -96,8 +96,8 @@ function Compile.SELECT( Object )
 	sReturn = ParseJoins( sReturn, Object )
 	sReturn = ParseWhere( sReturn, Object._where )
 	sReturn = ParseGroup( sReturn, Object )
-	sReturn = ParseOrder( sReturn, Object )
 	sReturn = ParseHaving(sReturn, Object._having )
+	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
 		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
 	end
