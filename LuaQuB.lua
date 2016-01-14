@@ -210,7 +210,7 @@ end
 
 function luaqub:having( clauses, value, joiner )
 	if not clauses then
-		error( "Matching clauses to where function expected" )
+		error( "Matching clauses to having function expected" )
 		return false
 	end
 	if type( clauses ) == "string" then
