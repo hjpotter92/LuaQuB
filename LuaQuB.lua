@@ -46,6 +46,18 @@ local function ParseWhere( sQuery, tWhere )
 	return sQuery
 end
 
+local function ParseHaving( sQuery, tHaving )
+	local tInput = TableCopy( tHaving )
+	if #tInput == 0 then return sQuery end
+	sQuery = sQuery.."\nHAVING "..tInput[1].statement
+	table.remove( tInput, 1 )
+	if #tInput == 0 then return sQuery end
+	for _, tValue in ipairs( tInput ) do
+		sQuery = sQuery.."\n\t"..tValue.join.." "..tValue.statement
+	end
+	return sQuery
+end
+
 local function ParseJoins( sInput, Object )
 	if #(Object._join) <= 0 then
 		return sInput
@@ -84,6 +96,7 @@ function Compile.SELECT( Object )
 	sReturn = ParseJoins( sReturn, Object )
 	sReturn = ParseWhere( sReturn, Object._where )
 	sReturn = ParseGroup( sReturn, Object )
+	sReturn = ParseHaving(sReturn, Object._having )
 	sReturn = ParseOrder( sReturn, Object )
 	if Object._limit > 0 then
 		sReturn = sReturn.."\nLIMIT "..tostring( Object._limit )
@@ -188,6 +201,30 @@ function luaqub:where( clauses, value, joiner )
 				table.insert( self._where, { join = joiner, statement = Value } )
 			else
 				table.insert( self._where, { join = joiner, statement = ("%s = %s"):format(Trim(Key), Trim(Value)) } )
+			end
+		end
+		clauses = nil
+	end
+	return self
+end
+
+function luaqub:having( clauses, value, joiner )
+	if not clauses then
+		error( "Matching clauses to having function expected" )
+		return false
+	end
+	if type( clauses ) == "string" then
+		if not joiner then joiner = 'and' end
+		table.insert( self._having, { join = joiner:upper(), statement = Trim(clauses).." "..Trim(value) } )
+		clauses = nil
+	elseif type( clauses ) == "table" then
+		if not value then value = 'and' end
+		joiner = value:upper()
+		for Key, Value in pairs( clauses ) do
+			if tonumber( Key ) then
+				table.insert( self._having, { join = joiner, statement = Value } )
+			else
+				table.insert( self._having, { join = joiner, statement = ("%s = %s"):format(Trim(Key), Trim(Value)) } )
 			end
 		end
 		clauses = nil
@@ -308,6 +345,7 @@ function luaqub.new()
 		_join = {},
 		_order = {},
 		_group = {},
+		_having = {},
 		_insert = {},
 		_limit = 0,
 		_offset = 0,
