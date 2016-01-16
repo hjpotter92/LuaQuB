@@ -1,3 +1,14 @@
+--- Query builder module for Lua.
+-- @author [hjpotter92](https://github.com/hjpotter92)
+-- @module LuaQuB
+-- @license MIT
+
+--- Metatable for `LuaQuB` module
+-- @table metatable
+-- @field __index Index lookup for metatable
+-- @field _DESCRIPTION Module description
+-- @field _VERSION Module version
+-- @field _AUTHOR Module author
 local luaqub = {
    _DESCRIPTION = "LuaQuB is a small query builder module for Lua",
    _VERSION = "2.0.0",
@@ -15,6 +26,14 @@ do
    local Explode, TableAdd = Functions.Explode, Functions.TableAdd
    local TableCopy, Trim = Functions.TableCopy, Functions.Trim
 
+   --- `SELECT` parameter aggregator.
+   -- The parameters passed to this function shall be aggregated
+   -- over all the calls. This function can be called more than
+   -- once for the same object.
+   -- @param _columns List of columns either as a string or in a table
+   -- @treturn LuaQuB
+   -- @function select
+   -- @raise Argument type mismatch
    function _meta:select( _columns )
       if not _columns then
          error "bad argument #2 to 'select' (table/string expected, got nil)"
@@ -25,6 +44,15 @@ do
       return self
    end
 
+   --- `FROM` parameter aggregator.
+   -- The parameters passed to this function shall be aggregated
+   -- over all the calls. This function can be called more than
+   -- once for the same object.
+   -- @param _tables List of columns either as a string or in a table
+   -- @treturn LuaQuB
+   -- @function from
+   -- @raise Argument type mismatch
+   -- @todo Add support so that `from` accepts another `LuaQuB` object
    function _meta:from( _tables )
       if not _tables then
          error "bad argument #2 to 'from' (table/string expected, got nil)"

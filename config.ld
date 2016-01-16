@@ -1,0 +1,11 @@
+title = "LuaQuB 2.0.0 &middot; Reference"
+project = "LuaQuB 2.0.0"
+description = "Something"
+file = "src/LuaQuB.lua"
+dir = "docs"
+format = "discount"
+--examples = "src/LuaQuB.lua"
+pretty = "lxsh"
+prettify_files = "show"
+readme = "README.md"
+all = true
