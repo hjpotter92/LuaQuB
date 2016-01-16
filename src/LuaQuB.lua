@@ -31,7 +31,7 @@ do
    -- over all the calls. This function can be called more than
    -- once for the same object.
    -- @param _columns List of columns either as a string or in a table
-   -- @treturn LuaQuB
+   -- @return `LuaQuB` The reference to updated object itself
    -- @function select
    -- @raise Argument type mismatch
    function _meta:select( _columns )
@@ -49,7 +49,7 @@ do
    -- over all the calls. This function can be called more than
    -- once for the same object.
    -- @param _tables List of columns either as a string or in a table
-   -- @treturn LuaQuB
+   -- @return `LuaQuB` The reference to updated object itself
    -- @function from
    -- @raise Argument type mismatch
    -- @todo Add support so that `from` accepts another `LuaQuB` object
@@ -63,9 +63,34 @@ do
       return self
    end
 
-   function _meta:compile()
+   --- Build the query with provided parameters.
+   -- The function call can be put in a conditional statement to test whether
+   -- your parameters can be used by the module to generate a meaningful query
+   -- or not. After `build` call, you can call upon `query` to fetch the built
+   -- query string.
+   -- @function build
+   -- @treturn boolean On successful build, returns `true`
+   -- @raise Invalid type of query parameters provided
+   function _meta:build()
+      if not ( self._select and self._from ) then
+         error "Invalid parameters provided to the module. The build failed."
+      end
       local sSelect, sFrom = table.concat( self._select, ",\n\t" ), table.concat( self._from, ",\n\t" )
-      return ( "SELECT %s\nFROM %s;" ):format( sSelect, sFrom )
+      self._query = ( "SELECT %s\nFROM %s;" ):format( sSelect, sFrom )
+      return true
+   end
+
+   --- Fetch the compiled query string.
+   -- After a successful `build` call, the built query is cached by the object
+   -- and can be retrieved by this function.
+   -- @function query
+   -- @treturn string The result of compiled query
+   -- @raise `build` was not called prior to fetching the query
+   function _meta:query()
+      if not self._query then
+         error "You need to `build` the query before trying to fetch it."
+      end
+      return self._query
    end
 
    local function _new( self )
