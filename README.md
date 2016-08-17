@@ -2,12 +2,12 @@ Lua Query Builder
 ========================
 
 LuaQuB is a small query builder module for Lua. The current stable release
-for the module is **1.0.0**.
+for the module is **1.1.0**.
 
 ## Requirements
 
 The module works perfectly with Lua v5.x. It has been tested successfully
-on Lua 5.2.
+with Lua 5.1.5 and Lua 5.2.4 on Windows 7 x64 and Debian 8 x64 platforms.
 
 ## Support(s)
 

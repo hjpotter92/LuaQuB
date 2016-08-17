@@ -1,25 +1,25 @@
 --- Query builder module for Lua.
--- @author [hjpotter92](https://github.com/hjpotter92)
 -- @module LuaQuB
+-- @author [hjpotter92](https://github.com/hjpotter92)
+-- @release 2.0.0
 -- @license MIT
 
 --- Metatable for `LuaQuB` module
 -- @table metatable
--- @field __index Index lookup for metatable
 -- @field _DESCRIPTION Module description
 -- @field _VERSION Module version
--- @field _AUTHOR Module author
+-- @field _AUTHOR Module author "hjpotter92 <hjpotter92+github@gmail.com>"
 local luaqub = {
    _DESCRIPTION = "LuaQuB is a small query builder module for Lua",
    _VERSION = "2.0.0",
-   _AUTHOR = "hjpotter92",
+   _AUTHOR = "hjpotter92 <hjpotter92+github@gmail.com>",
 }
 
 local Functions = require "functions"
 
 do
    local _meta = {
-      __metatable = "Private metatable for LuaQuB",
+      __metatable = "Private metatable for LuaQuB object",
    }
    _meta.__index = _meta
 
@@ -48,11 +48,11 @@ do
    -- The parameters passed to this function shall be aggregated
    -- over all the calls. This function can be called more than
    -- once for the same object.
-   -- @param _tables List of columns either as a string or in a table
+   -- @param _tables List of tables either as a string or in a table
    -- @return `LuaQuB` The reference to updated object itself
    -- @function from
    -- @raise Argument type mismatch
-   -- @todo Add support so that `from` accepts another `LuaQuB` object
+   -- @todo Add support so that it'll accept another `LuaQuB` object
    function _meta:from( _tables )
       if not _tables then
          error "bad argument #2 to 'from' (table/string expected, got nil)"
@@ -100,6 +100,7 @@ do
    setmetatable( luaqub, {
        new = _new,
        __call = _new,
+       __metatable = "Private metatable for LuaQuB module",
    })
 end
 
