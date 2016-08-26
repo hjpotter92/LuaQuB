@@ -1,6 +1,6 @@
 title = "LuaQuB 2.0.0 &middot; Reference"
 project = "LuaQuB 2.0.0"
-description = "Something"
+description = "Query Builder module for Lua"
 file = "src/LuaQuB.lua"
 dir = "docs"
 format = "discount"

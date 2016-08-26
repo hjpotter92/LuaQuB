@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>LuaQuB 2.0.0 &middot; Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>LuaQuB 2.0.0</h1>
+
+
+
+
+<h2>Source</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><strong>LuaQuB.lua</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="../index.html">LuaQuB</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>LuaQuB.lua</h2>
+<pre>
+<span class="comment">--- Query builder module for Lua.
+</span><span class="comment">-- @module LuaQuB
+</span><span class="comment">-- @author [hjpotter92](https://github.com/hjpotter92)
+</span><span class="comment">-- @release 2.0.0
+</span><span class="comment">-- @license MIT
+</span>
+<span class="comment">--- Metatable for <a href="../index.html#">LuaQuB</a> module
+</span><span class="comment">-- @table metatable
+</span><span class="comment">-- @field _DESCRIPTION Module description
+</span><span class="comment">-- @field _VERSION Module version
+</span><a id="12"></a><span class="comment">-- @field _AUTHOR Module author "hjpotter92 &lt;hjpotter92+github@gmail.com&gt;"
+</span><span class="keyword">local</span> luaqub = {
+  _DESCRIPTION = <span class="string">"LuaQuB is a small query builder module for Lua"</span>,
+  _VERSION = <span class="string">"2.0.0"</span>,
+  _AUTHOR = <span class="string">"hjpotter92 &lt;hjpotter92+github@gmail.com&gt;"</span>,
+}
+
+<span class="keyword">local</span> Functions = <span class="global">require</span> <span class="string">"functions"</span>
+
+<span class="keyword">do</span>
+  <span class="keyword">local</span> _meta = {
+    __metatable = <span class="string">"Private metatable for LuaQuB object"</span>,
+  }
+  _meta.__index = _meta
+
+  <span class="keyword">local</span> Explode, TableAdd = Functions.Explode, Functions.TableAdd
+  <span class="keyword">local</span> TableCopy, Trim = Functions.TableCopy, Functions.Trim
+
+  <span class="comment">--- <code>SELECT</code> parameter aggregator.
+</span>  <span class="comment">-- The parameters passed to this function shall be aggregated
+</span>  <span class="comment">-- over all the calls. This function can be called more than
+</span>  <span class="comment">-- once for the same object.
+</span>  <span class="comment">-- @param _columns List of columns either as a string or in a table
+</span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
+</span>  <span class="comment">-- @function select
+</span>  <a id="37"></a><span class="comment">-- @raise Argument type mismatch
+</span>  <span class="keyword">function</span> _meta:<span class="global">select</span>( _columns )
+    <span class="keyword">if</span> <span class="keyword">not</span> _columns <span class="keyword">then</span>
+      error <span class="string">"bad argument #2 to 'select' (table/string expected, got nil)"</span>
+    <span class="keyword">end</span>
+    self._built = <span class="keyword">false</span>
+    <span class="keyword">local</span> __select = ( <span class="global">type</span>(_columns) == <span class="string">"table"</span> <span class="keyword">and</span> _columns ) <span class="keyword">or</span> Explode( _columns )
+    <span class="keyword">if</span> <span class="keyword">not</span> self._select <span class="keyword">then</span> self._select = {} <span class="keyword">end</span>
+    TableAdd( self._select, __select )
+    <span class="keyword">return</span> self
+  <span class="keyword">end</span>
+
+  <span class="comment">--- <code>FROM</code> parameter aggregator.
+</span>  <span class="comment">-- The parameters passed to this function shall be aggregated
+</span>  <span class="comment">-- over all the calls. This function can be called more than
+</span>  <span class="comment">-- once for the same object.
+</span>  <span class="comment">-- @param _tables List of tables either as a string or in a table
+</span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
+</span>  <span class="comment">-- @function from
+</span>  <span class="comment">-- @raise Argument type mismatch
+</span>  <a id="57"></a><span class="comment">-- @todo Add support so that it'll accept another <a href="../index.html#">LuaQuB</a> object
+</span>  <span class="keyword">function</span> _meta:from( _tables )
+    <span class="keyword">if</span> <span class="keyword">not</span> _tables <span class="keyword">then</span>
+      error <span class="string">"bad argument #2 to 'from' (table/string expected, got nil)"</span>
+    <span class="keyword">end</span>
+    self._built = <span class="keyword">false</span>
+    <span class="keyword">local</span> __from = ( <span class="global">type</span>(_tables) == <span class="string">"table"</span> <span class="keyword">and</span> _tables ) <span class="keyword">or</span> Explode( _tables )
+    <span class="keyword">if</span> <span class="keyword">not</span> self._from <span class="keyword">then</span> self._from = {} <span class="keyword">end</span>
+    TableAdd( self._from, __from )
+    <span class="keyword">return</span> self
+  <span class="keyword">end</span>
+
+  <span class="comment">--- <code>LIMIT</code> parameter aggregator
+</span>  <span class="comment">-- Generates the <code>LIMIT</code> and <code>OFFSET</code> clauses for the query.
+</span>  <span class="comment">-- @param iLimit Integer value for setting LIMIT
+</span>  <span class="comment">-- @param iOffset Integer value to set OFFSET
+</span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
+</span>  <span class="comment">-- @function limit
+</span>  <a id="75"></a><span class="comment">-- @raise Argument type mismatch
+</span>  <span class="keyword">function</span> _meta:limit( iLimit, iOffset )
+    <span class="keyword">if</span> <span class="keyword">not</span> iLimit <span class="keyword">or</span> <span class="global">type</span>(iLimit) ~= <span class="string">"number"</span> <span class="keyword">then</span>
+      error <span class="string">"bad argument #2 to 'limit' (number expected)"</span>
+    <span class="keyword">end</span>
+    self._limit = iLimit
+    <span class="keyword">if</span> iOffset <span class="keyword">and</span> <span class="global">type</span>(iLimit) ~= <span class="string">"number"</span> <span class="keyword">then</span>
+      error <span class="string">"bad argument #3 to 'limit' (number expected)"</span>
+    <span class="keyword">end</span>
+    self._offset = iOffset
+    <span class="keyword">return</span> self
+  <span class="keyword">end</span>
+
+  <span class="comment">--- Build the query with provided parameters.
+</span>  <span class="comment">-- The function call can be put in a conditional statement to test whether
+</span>  <span class="comment">-- your parameters can be used by the module to generate a meaningful query
+</span>  <span class="comment">-- or not. After <a href="../index.html#build">build</a> call, you can call upon <a href="../index.html#query">query</a> to fetch the built
+</span>  <span class="comment">-- query string.
+</span>  <span class="comment">-- @function build
+</span>  <span class="comment">-- @treturn boolean On successful build, returns <code>true</code>
+</span>  <a id="95"></a><span class="comment">-- @raise Invalid type of query parameters provided
+</span>  <span class="keyword">function</span> _meta:build()
+    <span class="keyword">if</span> <span class="keyword">not</span> ( self._select <span class="keyword">and</span> self._from ) <span class="keyword">then</span>
+      error <span class="string">"Invalid parameters provided to the module. The build failed."</span>
+    <span class="keyword">end</span>
+    <span class="keyword">local</span> sSelect, sFrom = <span class="global">table</span>.concat( self._select, <span class="string">",\n\t"</span> ), <span class="global">table</span>.concat( self._from, <span class="string">",\n\t"</span> )
+    self._query = ( <span class="string">"SELECT %s\nFROM %s"</span> ):format( sSelect, sFrom )
+    <span class="keyword">if</span> self._limit <span class="keyword">then</span>
+      self._query = self._query .. (<span class="string">"\nLIMIT %d"</span>):format(self._limit)
+      <span class="keyword">if</span> self._offset <span class="keyword">then</span>
+        self._query = self._query .. (<span class="string">"\nOFFSET %d"</span>):format(self._offset)
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    self._built = <span class="keyword">true</span>
+    <span class="keyword">return</span> <span class="keyword">true</span>
+  <span class="keyword">end</span>
+
+  <span class="comment">--- Fetch the compiled query string.
+</span>  <span class="comment">-- After a successful <a href="../index.html#build">build</a> call, the built query is cached by the object
+</span>  <span class="comment">-- and can be retrieved by this function.
+</span>  <span class="comment">-- @function query
+</span>  <span class="comment">-- @treturn string The result of compiled query
+</span>  <a id="117"></a><span class="comment">-- @raise <a href="../index.html#build">build</a> was not called prior to fetching the query
+</span>  <span class="keyword">function</span> _meta:query()
+    <span class="keyword">if</span> self._built == <span class="keyword">false</span> <span class="keyword">or</span> <span class="keyword">not</span> self._query <span class="keyword">then</span>
+      error <span class="string">"You need to `build` the query before trying to fetch it."</span>
+    <span class="keyword">end</span>
+    <span class="keyword">return</span> self._query
+  <span class="keyword">end</span>
+
+  <span class="keyword">local</span> <span class="keyword">function</span> _new( self )
+    <span class="keyword">return</span> <span class="global">setmetatable</span>( {}, _meta )
+  <span class="keyword">end</span>
+
+  <span class="global">setmetatable</span>( luaqub, {
+                  new = _new,
+                  __call = _new,
+                  __metatable = <span class="string">"Private metatable for LuaQuB module"</span>,
+  })
+<span class="keyword">end</span>
+
+luaqub.__index = luaqub
+
+<span class="keyword">return</span> luaqub</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2016-08-26 23:50:31 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

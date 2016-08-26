@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>LuaQuB 2.0.0 &middot; Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>LuaQuB 2.0.0</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><strong>LuaQuB</strong></li>
+</ul>
+<h2>Topics</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="topics/README.md.html">README</a></li>
+</ul>
+<h2>Source</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="source/LuaQuB.lua.html">LuaQuB.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>LuaQuB</code></h1>
+<p>Query builder module for Lua.</p>
+<p></p>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Release</strong>: 2.0.0</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: <a href="https://github.com/hjpotter92">hjpotter92</a></li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#select">select (_columns)</a></td>
+	<td class="summary"><code>SELECT</code> parameter aggregator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from">from (_tables)</a></td>
+	<td class="summary"><code>FROM</code> parameter aggregator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#limit">limit (iLimit, iOffset)</a></td>
+	<td class="summary"><code>LIMIT</code> parameter aggregator
+ Generates the <code>LIMIT</code> and <code>OFFSET</code> clauses for the query.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#build">build ()</a></td>
+	<td class="summary">Build the query with provided parameters.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#query">query ()</a></td>
+	<td class="summary">Fetch the compiled query string.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#metatable">metatable</a></td>
+	<td class="summary">Metatable for <a href="index.html#">LuaQuB</a> module</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "select"></a>
+    <strong>select (_columns)</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#37">line 37</a>
+    </dt>
+    <dd>
+    <code>SELECT</code> parameter aggregator.
+ The parameters passed to this function shall be aggregated
+ over all the calls. This function can be called more than
+ once for the same object.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">_columns</span>
+         List of columns either as a string or in a table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        <a href="index.html#">LuaQuB</a> The reference to updated object itself
+    </ol>
+
+    <h3>Raises:</h3>
+    Argument type mismatch
+
+
+
+</dd>
+    <dt>
+    <a name = "from"></a>
+    <strong>from (_tables)</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#57">line 57</a>
+    </dt>
+    <dd>
+    <code>FROM</code> parameter aggregator.
+ The parameters passed to this function shall be aggregated
+ over all the calls. This function can be called more than
+ once for the same object.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">_tables</span>
+         List of tables either as a string or in a table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        <a href="index.html#">LuaQuB</a> The reference to updated object itself
+    </ol>
+
+    <h3>Raises:</h3>
+    Argument type mismatch
+
+
+
+</dd>
+    <dt>
+    <a name = "limit"></a>
+    <strong>limit (iLimit, iOffset)</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#75">line 75</a>
+    </dt>
+    <dd>
+    <code>LIMIT</code> parameter aggregator
+ Generates the <code>LIMIT</code> and <code>OFFSET</code> clauses for the query.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">iLimit</span>
+         Integer value for setting LIMIT
+        </li>
+        <li><span class="parameter">iOffset</span>
+         Integer value to set OFFSET
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        <a href="index.html#">LuaQuB</a> The reference to updated object itself
+    </ol>
+
+    <h3>Raises:</h3>
+    Argument type mismatch
+
+
+
+</dd>
+    <dt>
+    <a name = "build"></a>
+    <strong>build ()</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#95">line 95</a>
+    </dt>
+    <dd>
+    Build the query with provided parameters.
+ The function call can be put in a conditional statement to test whether
+ your parameters can be used by the module to generate a meaningful query
+ or not. After <a href="index.html#build">build</a> call, you can call upon <a href="index.html#query">query</a> to fetch the built
+ query string.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        On successful build, returns <code>true</code>
+    </ol>
+
+    <h3>Raises:</h3>
+    Invalid type of query parameters provided
+
+
+
+</dd>
+    <dt>
+    <a name = "query"></a>
+    <strong>query ()</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#117">line 117</a>
+    </dt>
+    <dd>
+    Fetch the compiled query string.
+ After a successful <a href="index.html#build">build</a> call, the built query is cached by the object
+ and can be retrieved by this function.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        The result of compiled query
+    </ol>
+
+    <h3>Raises:</h3>
+    <a href="index.html#build">build</a> was not called prior to fetching the query
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "metatable"></a>
+    <strong>metatable</strong>
+    <a style="float:right;" href="source/LuaQuB.lua.html#12">line 12</a>
+    </dt>
+    <dd>
+    Metatable for <a href="index.html#">LuaQuB</a> module
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">_DESCRIPTION</span>
+         Module description
+        </li>
+        <li><span class="parameter">_VERSION</span>
+         Module version
+        </li>
+        <li><span class="parameter">_AUTHOR</span>
+         Module author &ldquo;hjpotter92 <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#104;&#106;&#112;&#111;&#116;&#116;&#101;&#114;&#57;&#50;&#43;&#103;&#105;&#116;&#104;&#117;&#98;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">&#104;&#106;&#112;&#111;&#116;&#116;&#101;&#114;&#57;&#50;&#43;&#103;&#105;&#116;&#104;&#117;&#98;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;</a>&rdquo;
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2016-08-26 23:50:31 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
