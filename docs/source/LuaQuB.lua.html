@@ -75,6 +75,7 @@
 
   <span class="keyword">local</span> Explode, TableAdd = Functions.Explode, Functions.TableAdd
   <span class="keyword">local</span> TableCopy, Trim = Functions.TableCopy, Functions.Trim
+  <span class="keyword">local</span> Insert, Concat = <span class="global">table</span>.insert, <span class="global">table</span>.concat
 
   <span class="comment">--- <code>SELECT</code> parameter aggregator.
 </span>  <span class="comment">-- The parameters passed to this function shall be aggregated
@@ -83,7 +84,7 @@
 </span>  <span class="comment">-- @param _columns List of columns either as a string or in a table
 </span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
 </span>  <span class="comment">-- @function select
-</span>  <a id="37"></a><span class="comment">-- @raise Argument type mismatch
+</span>  <a id="38"></a><span class="comment">-- @raise Argument type mismatch
 </span>  <span class="keyword">function</span> _meta:<span class="global">select</span>( _columns )
     <span class="keyword">if</span> <span class="keyword">not</span> _columns <span class="keyword">then</span>
       error <span class="string">"bad argument #2 to 'select' (table/string expected, got nil)"</span>
@@ -103,7 +104,7 @@
 </span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
 </span>  <span class="comment">-- @function from
 </span>  <span class="comment">-- @raise Argument type mismatch
-</span>  <a id="57"></a><span class="comment">-- @todo Add support so that it'll accept another <a href="../index.html#">LuaQuB</a> object
+</span>  <a id="58"></a><span class="comment">-- @todo Add support so that it'll accept another <a href="../index.html#">LuaQuB</a> object
 </span>  <span class="keyword">function</span> _meta:from( _tables )
     <span class="keyword">if</span> <span class="keyword">not</span> _tables <span class="keyword">then</span>
       error <span class="string">"bad argument #2 to 'from' (table/string expected, got nil)"</span>
@@ -115,22 +116,62 @@
     <span class="keyword">return</span> self
   <span class="keyword">end</span>
 
-  <span class="comment">--- <code>LIMIT</code> parameter aggregator
+  <span class="comment">--- <code>LIMIT</code> parameter aggregator.
 </span>  <span class="comment">-- Generates the <code>LIMIT</code> and <code>OFFSET</code> clauses for the query.
 </span>  <span class="comment">-- @param iLimit Integer value for setting LIMIT
 </span>  <span class="comment">-- @param iOffset Integer value to set OFFSET
 </span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
 </span>  <span class="comment">-- @function limit
-</span>  <a id="75"></a><span class="comment">-- @raise Argument type mismatch
+</span>  <a id="76"></a><span class="comment">-- @raise Argument type mismatch
 </span>  <span class="keyword">function</span> _meta:limit( iLimit, iOffset )
     <span class="keyword">if</span> <span class="keyword">not</span> iLimit <span class="keyword">or</span> <span class="global">type</span>(iLimit) ~= <span class="string">"number"</span> <span class="keyword">then</span>
       error <span class="string">"bad argument #2 to 'limit' (number expected)"</span>
     <span class="keyword">end</span>
-    self._limit = iLimit
-    <span class="keyword">if</span> iOffset <span class="keyword">and</span> <span class="global">type</span>(iLimit) ~= <span class="string">"number"</span> <span class="keyword">then</span>
+    self._limit = (<span class="string">"\nLIMIT %d"</span>):format(iLimit)
+    <span class="keyword">if</span> iOffset <span class="keyword">and</span> <span class="global">type</span>(iOffset) ~= <span class="string">"number"</span> <span class="keyword">then</span>
       error <span class="string">"bad argument #3 to 'limit' (number expected)"</span>
     <span class="keyword">end</span>
-    self._offset = iOffset
+    <span class="keyword">if</span> iOffset <span class="keyword">then</span>
+      self._offset = (<span class="string">"\nOFFSET %d"</span>):format(iOffset)
+    <span class="keyword">end</span>
+    <span class="keyword">return</span> self
+  <span class="keyword">end</span>
+
+  <span class="comment">--- <code>ORDER BY</code> parameter aggregator.
+</span>  <span class="comment">-- Generates the <code>ORDER BY</code> clause for various table keys and
+</span>  <span class="comment">-- associated directions with them.
+</span>  <span class="comment">-- @param _key The table key (column) which to order against. Can be
+</span>  <span class="comment">-- an integer or string or a table of strings.
+</span>  <span class="comment">-- @tparam string _dir The direction (<code>ASC</code> or <code>DESC</code> or <code>RANDOM</code>). Default
+</span>  <span class="comment">-- is <code>ASC</code>.
+</span>  <span class="comment">-- @return <a href="../index.html#">LuaQuB</a> The reference to updated object itself
+</span>  <span class="comment">-- @function order
+</span>  <a id="100"></a><span class="comment">-- @raise Argument type mismatch
+</span>  <span class="keyword">function</span> _meta:order( _key, _dir )
+    <span class="keyword">if</span> <span class="keyword">not</span> _key <span class="keyword">then</span>
+      error <span class="string">"bad argument #2 to 'order' (number/string/table expected)"</span>
+    <span class="keyword">end</span>
+    <span class="keyword">local</span> sDirection = Trim( _dir <span class="keyword">and</span> _dir:upper() <span class="keyword">or</span> <span class="string">"ASC"</span> )
+    <span class="keyword">if</span> <span class="global">tonumber</span>( _key ) <span class="keyword">and</span> sDirection ~= <span class="string">"RANDOM"</span> <span class="keyword">then</span>
+      error <span class="string">"invalid argument #3 to 'order' for 'number' type argument #2"</span>
+    <span class="keyword">end</span>
+    <span class="keyword">local</span> __order = ( <span class="global">type</span>(_key) == <span class="string">"table"</span> <span class="keyword">and</span> _key ) <span class="keyword">or</span> Explode(_key)
+    <span class="keyword">local</span> tTemp = {}
+    <span class="keyword">if</span> #__order == <span class="number">0</span> <span class="keyword">then</span>
+      <span class="keyword">for</span> col, dir <span class="keyword">in</span> <span class="global">pairs</span>(__order) <span class="keyword">do</span>
+        Insert( tTemp, (<span class="string">"%s %s"</span>):format(Trim(col), Trim(dir:upper())) )
+      <span class="keyword">end</span>
+    <span class="keyword">else</span>
+      <span class="keyword">for</span> _, value <span class="keyword">in</span> <span class="global">ipairs</span>(__order) <span class="keyword">do</span>
+        <span class="keyword">if</span> <span class="global">tonumber</span>( value ) <span class="keyword">then</span>
+          Insert( tTemp, (<span class="string">"RANDOM(%d)"</span>):format(value) )
+        <span class="keyword">else</span>
+          Insert( tTemp, (<span class="string">"%s %s"</span>):format(Trim(value), sDirection) )
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> self._order <span class="keyword">then</span> self._order = {} <span class="keyword">end</span>
+    TableAdd( self._order, tTemp )
     <span class="keyword">return</span> self
   <span class="keyword">end</span>
 
@@ -141,17 +182,20 @@
 </span>  <span class="comment">-- query string.
 </span>  <span class="comment">-- @function build
 </span>  <span class="comment">-- @treturn boolean On successful build, returns <code>true</code>
-</span>  <a id="95"></a><span class="comment">-- @raise Invalid type of query parameters provided
+</span>  <a id="136"></a><span class="comment">-- @raise Invalid type of query parameters provided
 </span>  <span class="keyword">function</span> _meta:build()
     <span class="keyword">if</span> <span class="keyword">not</span> ( self._select <span class="keyword">and</span> self._from ) <span class="keyword">then</span>
       error <span class="string">"Invalid parameters provided to the module. The build failed."</span>
     <span class="keyword">end</span>
-    <span class="keyword">local</span> sSelect, sFrom = <span class="global">table</span>.concat( self._select, <span class="string">",\n\t"</span> ), <span class="global">table</span>.concat( self._from, <span class="string">",\n\t"</span> )
+    <span class="keyword">local</span> sSelect, sFrom = Concat( self._select, <span class="string">",\n\t"</span> ), Concat( self._from, <span class="string">",\n\t"</span> )
     self._query = ( <span class="string">"SELECT %s\nFROM %s"</span> ):format( sSelect, sFrom )
+    <span class="keyword">if</span> self._order <span class="keyword">then</span>
+      self._query = self._query .. ( <span class="string">"\nORDER BY %s"</span> ):format( Concat(self._order, <span class="string">",\n\t"</span>) )
+    <span class="keyword">end</span>
     <span class="keyword">if</span> self._limit <span class="keyword">then</span>
-      self._query = self._query .. (<span class="string">"\nLIMIT %d"</span>):format(self._limit)
+      self._query = self._query .. self._limit
       <span class="keyword">if</span> self._offset <span class="keyword">then</span>
-        self._query = self._query .. (<span class="string">"\nOFFSET %d"</span>):format(self._offset)
+        self._query = self._query .. self._offset
       <span class="keyword">end</span>
     <span class="keyword">end</span>
     self._built = <span class="keyword">true</span>
@@ -163,7 +207,7 @@
 </span>  <span class="comment">-- and can be retrieved by this function.
 </span>  <span class="comment">-- @function query
 </span>  <span class="comment">-- @treturn string The result of compiled query
-</span>  <a id="117"></a><span class="comment">-- @raise <a href="../index.html#build">build</a> was not called prior to fetching the query
+</span>  <a id="161"></a><span class="comment">-- @raise <a href="../index.html#build">build</a> was not called prior to fetching the query
 </span>  <span class="keyword">function</span> _meta:query()
     <span class="keyword">if</span> self._built == <span class="keyword">false</span> <span class="keyword">or</span> <span class="keyword">not</span> self._query <span class="keyword">then</span>
       error <span class="string">"You need to `build` the query before trying to fetch it."</span>
@@ -175,11 +219,14 @@
     <span class="keyword">return</span> <span class="global">setmetatable</span>( {}, _meta )
   <span class="keyword">end</span>
 
-  <span class="global">setmetatable</span>( luaqub, {
-                  new = _new,
-                  __call = _new,
-                  __metatable = <span class="string">"Private metatable for LuaQuB module"</span>,
-  })
+  <span class="global">setmetatable</span>(
+    luaqub,
+    {
+      new = _new,
+      __call = _new,
+      __metatable = <span class="string">"Private metatable for LuaQuB module"</span>,
+    }
+  )
 <span class="keyword">end</span>
 
 luaqub.__index = luaqub
@@ -191,7 +238,7 @@ luaqub.__index = luaqub
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
-<i style="float:right;">Last updated 2016-08-26 23:50:31 </i>
+<i style="float:right;">Last updated 2016-08-27 01:40:33 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

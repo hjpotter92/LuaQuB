@@ -25,6 +25,7 @@ do
 
   local Explode, TableAdd = Functions.Explode, Functions.TableAdd
   local TableCopy, Trim = Functions.TableCopy, Functions.Trim
+  local Insert, Concat = table.insert, table.concat
 
   --- `SELECT` parameter aggregator.
   -- The parameters passed to this function shall be aggregated
@@ -65,7 +66,7 @@ do
     return self
   end
 
-  --- `LIMIT` parameter aggregator
+  --- `LIMIT` parameter aggregator.
   -- Generates the `LIMIT` and `OFFSET` clauses for the query.
   -- @param iLimit Integer value for setting LIMIT
   -- @param iOffset Integer value to set OFFSET
@@ -76,11 +77,51 @@ do
     if not iLimit or type(iLimit) ~= "number" then
       error "bad argument #2 to 'limit' (number expected)"
     end
-    self._limit = iLimit
-    if iOffset and type(iLimit) ~= "number" then
+    self._limit = ("\nLIMIT %d"):format(iLimit)
+    if iOffset and type(iOffset) ~= "number" then
       error "bad argument #3 to 'limit' (number expected)"
     end
-    self._offset = iOffset
+    if iOffset then
+      self._offset = ("\nOFFSET %d"):format(iOffset)
+    end
+    return self
+  end
+
+  --- `ORDER BY` parameter aggregator.
+  -- Generates the `ORDER BY` clause for various table keys and
+  -- associated directions with them.
+  -- @param _key The table key (column) which to order against. Can be
+  -- an integer or string or a table of strings.
+  -- @tparam string _dir The direction (`ASC` or `DESC` or `RANDOM`). Default
+  -- is `ASC`.
+  -- @return `LuaQuB` The reference to updated object itself
+  -- @function order
+  -- @raise Argument type mismatch
+  function _meta:order( _key, _dir )
+    if not _key then
+      error "bad argument #2 to 'order' (number/string/table expected)"
+    end
+    local sDirection = Trim( _dir and _dir:upper() or "ASC" )
+    if tonumber( _key ) and sDirection ~= "RANDOM" then
+      error "invalid argument #3 to 'order' for 'number' type argument #2"
+    end
+    local __order = ( type(_key) == "table" and _key ) or Explode(_key)
+    local tTemp = {}
+    if #__order == 0 then
+      for col, dir in pairs(__order) do
+        Insert( tTemp, ("%s %s"):format(Trim(col), Trim(dir:upper())) )
+      end
+    else
+      for _, value in ipairs(__order) do
+        if tonumber( value ) then
+          Insert( tTemp, ("RANDOM(%d)"):format(value) )
+        else
+          Insert( tTemp, ("%s %s"):format(Trim(value), sDirection) )
+        end
+      end
+    end
+    if not self._order then self._order = {} end
+    TableAdd( self._order, tTemp )
     return self
   end
 
@@ -96,12 +137,15 @@ do
     if not ( self._select and self._from ) then
       error "Invalid parameters provided to the module. The build failed."
     end
-    local sSelect, sFrom = table.concat( self._select, ",\n\t" ), table.concat( self._from, ",\n\t" )
+    local sSelect, sFrom = Concat( self._select, ",\n\t" ), Concat( self._from, ",\n\t" )
     self._query = ( "SELECT %s\nFROM %s" ):format( sSelect, sFrom )
+    if self._order then
+      self._query = self._query .. ( "\nORDER BY %s" ):format( Concat(self._order, ",\n\t") )
+    end
     if self._limit then
-      self._query = self._query .. ("\nLIMIT %d"):format(self._limit)
+      self._query = self._query .. self._limit
       if self._offset then
-        self._query = self._query .. ("\nOFFSET %d"):format(self._offset)
+        self._query = self._query .. self._offset
       end
     end
     self._built = true
@@ -125,11 +169,14 @@ do
     return setmetatable( {}, _meta )
   end
 
-  setmetatable( luaqub, {
-                  new = _new,
-                  __call = _new,
-                  __metatable = "Private metatable for LuaQuB module",
-  })
+  setmetatable(
+    luaqub,
+    {
+      new = _new,
+      __call = _new,
+      __metatable = "Private metatable for LuaQuB module",
+    }
+  )
 end
 
 luaqub.__index = luaqub

@@ -1,12 +1,16 @@
 return {
-   _all = {
-      coverage = false,
-      verbose = true,
-   },
-   default = {
-      recursive = false,
-      lang = "en",
-      shuffle = true,
-      ["repeat"] = 3,
-   },
+  _all = {
+    coverage = false,
+    verbose = true,
+  },
+  default = {
+    recursive = false,
+    lang = "en",
+    shuffle = true,
+    ["repeat"] = 1,
+    ["ROOT"] = {
+      "tests/",
+    },
+    ["pattern"] = "^tes"
+  },
 }
